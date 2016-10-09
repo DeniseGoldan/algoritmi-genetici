@@ -40,7 +40,7 @@ public class SixHumpCamelBack implements Function {
 
     @Override
     public String getFunctionName() {
-        return "SixHumpCamelBack function";
+        return "Six Hump Camel Back function";
     }
 
     @Override

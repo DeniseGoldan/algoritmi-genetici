@@ -2,10 +2,7 @@ package functions;
 
 import utility.ClosedInterval;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Denise Goldan on 10/6/2016.
@@ -37,9 +34,6 @@ public class Schwefel implements Function {
 
     @Override
     public List<ClosedInterval> getVariablesDomain() {
-        List<ClosedInterval> domain = new ArrayList<>();
-        ClosedInterval interval = new ClosedInterval(DOMAIN_FIRST_ENDPOINT, DOMAIN_SECOND_ENDPOINT);
-        domain.add(interval);
-        return domain;
+        return Collections.singletonList(new ClosedInterval(DOMAIN_FIRST_ENDPOINT ,DOMAIN_SECOND_ENDPOINT));
     }
 }

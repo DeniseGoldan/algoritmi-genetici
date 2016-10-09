@@ -11,90 +11,101 @@ import java.util.List;
  */
 public class MinimumFinder {
 
-    private static final double MAXIMUM_NUMBER_OF_STEPS = 1000;
-    private static final double STEP_LENGTH = 0.01;
-    private static final double NUMBER_OF_TRIES = 1000;
+    private MinimumFinderConfiguration configuration;
+
+    private Function targetedFunction;
 
     private double bestSolution = Integer.MAX_VALUE;
+
     private List<Double> bestSolutionVariables = new ArrayList<>();
 
-    private int maximumDepth;
-    private Function targetedFunction;
-    private int numberOfVariables;
-
-    public static void main(String[] args) {
-        Ackley function = new Ackley();
-        MinimumFinder scout = new MinimumFinder();
-        scout.searchBestConfiguration(function, 4, 3);
+    public void searchBestSolution(Function function, int desiredNumberOfVariables) {
+        configureSearch(function, desiredNumberOfVariables);
+        List<Double> variables = RandomGenerator.getRandomVariableValueList(desiredNumberOfVariables, targetedFunction.getVariablesDomain());
+        executeTargetedFunction(variables);
     }
-
-    public void searchBestConfiguration(Function function, int desiredNumberOfVariables, int desiredDepth) {
-        configureSearch(function, desiredNumberOfVariables, desiredDepth);
-        for (int i = 0; i < NUMBER_OF_TRIES; i++) {
-            executeTargetedFunction();
-        }
-        printBestConfiguration();
-    }
-
-    public void executeTargetedFunction() {
-        List<Double> variables = RandomGenerator.getRandomVariableValueList(numberOfVariables, targetedFunction.getVariablesDomain());
-        if (targetedFunction.getCalculationResult(variables) < bestSolution) {
-           updateBestSolution(variables);
+    public void executeTargetedFunction(List<Double> variables) {
+        double result = targetedFunction.getCalculationResult(variables);
+        if (result < bestSolution) {
+            updateBestSolution(variables, result);
         }
         optimizeVariables(variables);
     }
 
-    private void optimizeVariables(List<Double> variables) {
-        for (int index = 0; index < numberOfVariables; index++) {
-            optimizeIndex(0, variables, STEP_LENGTH, index);
+    public void optimizeVariables(List<Double> variables) {
+        for (int index = 0; index < variables.size(); index++) {
+            optimizeIndex(0, variables, index);
         }
     }
 
-    public void optimizeIndex(int currentDepth, List<Double> variables, double stepLength, int index) {
-        if (currentDepth < maximumDepth) {
+    public void optimizeIndex(int currentDepth, List<Double> variables, int index) {
+        if (currentDepth < configuration.getMaximumDepth()) {
             ClosedInterval domain = getDomainForCurrentIndexVariable(index);
-            searchLeft(currentDepth, variables, stepLength, index, domain);
-            searchRight(currentDepth, variables, stepLength, index, domain);
+            searchLeft(currentDepth, variables, index);
+            searchRight(currentDepth, variables, index);
         }
         currentDepth++;
     }
 
-    private void searchRight(int currentDepth, List<Double> variables, double stepLength, int index, ClosedInterval domain) {
-        int doneStepsToRight = 0;
-        while (doneStepsToRight < MAXIMUM_NUMBER_OF_STEPS) {
+    public void searchRight(int currentDepth, List<Double> variables, int index) {
+        ClosedInterval domain = getDomainForCurrentIndexVariable(index);
+        double stepLength = calculateStepLength(currentDepth);
+        int doneSteps = 0;
+        while (doneSteps < configuration.getNumberOfSteps()) {
             double bigger = variables.get(index) + stepLength;
             if (!ClosedInterval.isInsideClosedInterval(bigger, domain)) {
                 break;
             }
             List<Double> searchVariables = getUpdatedList(variables, index, bigger);
+            double result = targetedFunction.getCalculationResult(searchVariables);
             if (targetedFunction.getCalculationResult(searchVariables) < bestSolution) {
-                updateBestSolution(searchVariables);
-                optimizeIndex(++currentDepth, searchVariables, stepLength / 2, index);
+                updateBestSolution(searchVariables, result);
+                optimizeIndex(++currentDepth, searchVariables, index);
             }
-            doneStepsToRight++;
+            doneSteps++;
         }
     }
 
-    private void searchLeft(int currentDepth, List<Double> variables, double stepLength, int index, ClosedInterval domain) {
-        int doneStepsToLeft = 0;
-        while (doneStepsToLeft < MAXIMUM_NUMBER_OF_STEPS) {
+    public void searchLeft(int currentDepth, List<Double> variables, int index) {
+        ClosedInterval domain = getDomainForCurrentIndexVariable(index);
+        double stepLength = calculateStepLength(currentDepth);
+        int doneSteps = 0;
+        while (doneSteps < configuration.getNumberOfSteps()) {
             double smaller = variables.get(index) - stepLength;
             if (!ClosedInterval.isInsideClosedInterval(smaller, domain)) {
                 break;
             }
             List<Double> searchVariables = getUpdatedList(variables, index, smaller);
-            if (targetedFunction.getCalculationResult(searchVariables) < bestSolution) {
-                updateBestSolution(searchVariables);
-                optimizeIndex(++currentDepth, searchVariables, stepLength / 2, index);
+            double result = targetedFunction.getCalculationResult(searchVariables);
+            if (result < bestSolution) {
+                updateBestSolution(searchVariables, result);
+                optimizeIndex(++currentDepth, searchVariables, index);
             }
-            doneStepsToLeft++;
+            doneSteps++;
         }
     }
 
-    private List<Double> getUpdatedList(List<Double> variables, int index, double smaller) {
-        List<Double> leftCaseVariables = variables;
-        leftCaseVariables.set(index, smaller);
-        return leftCaseVariables;
+    public double calculateStepLength(int currentDepth) {
+        double stepLength;
+        if (currentDepth < 0) {
+            throw new AssertionError("The currentDepth can not be a negative number!");
+        }
+        if (0 == currentDepth) {
+            stepLength = configuration.getStepLength();
+        } else {
+            stepLength = configuration.getStepLength() * Math.pow(0.75, currentDepth);
+        }
+        return stepLength;
+    }
+
+    public MinimumFinderConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public List<Double> getUpdatedList(List<Double> variables, int index, double smaller) {
+        List<Double> updatedVariables = new ArrayList<>(variables);
+        updatedVariables.set(index, smaller);
+        return updatedVariables;
     }
 
     public ClosedInterval getDomainForCurrentIndexVariable(int currentVariableIndex) {
@@ -107,44 +118,40 @@ public class MinimumFinder {
         return currentIndexDomain;
     }
 
-    private void updateBestSolution(List<Double> variables) {
-        bestSolution =  targetedFunction.getCalculationResult(variables);
-        bestSolutionVariables = variables;
+    public void updateBestSolution(List<Double> variables, double result) {
+        bestSolution = result;
+        bestSolutionVariables = new ArrayList<>(variables);
     }
 
-    private void configureSearch(Function function, int desiredNumberOfVariables, int desiredDepth) {
+    public void configureSearch(Function function, int desiredNumberOfVariables) {
         setTargetedFunction(function);
-        setNumberOfVariables(desiredNumberOfVariables);
-        setMaximumDepth(desiredDepth);
+        configuration = new MinimumFinderConfiguration();
+        configuration.configureSearch(function, desiredNumberOfVariables);
     }
 
-    private void setTargetedFunction(Function function) {
+    public void setTargetedFunction(Function function) {
         targetedFunction = function;
     }
 
-    public void setMaximumDepth(int desiredDepth) {
-        if (desiredDepth < 1) {
-            throw new AssertionError("The depth of the search must be higher than 0.");
-        }
-        maximumDepth = desiredDepth;
+    public double getBestSolution() {
+        return bestSolution;
     }
 
-    public void setNumberOfVariables(int desiredNumberOfVariables) {
-        if (desiredNumberOfVariables < 1) {
-            throw new AssertionError("The number of variables must be greater than 0.");
-        }
-        if (2 != numberOfVariables && targetedFunction.getFunctionName() == "SixHumpCamelBack function") {
-            throw new RuntimeException(targetedFunction.getFunctionName() + " has only 2 variables. The desiredNumberOfVariables can only be equal to 2. ");
-        }
-        numberOfVariables = desiredNumberOfVariables;
+    public List<Double> getBestSolutionVariables() {
+        return bestSolutionVariables;
     }
 
     public void printBestConfiguration() {
         System.out.println(targetedFunction.getFunctionName());
-        System.out.println("f(x1,x2...xi)= " + bestSolution);
+        System.out.println();
+        System.out.println("f(x1,x2...xi) = " + bestSolution);
         for (int i = 0; i < bestSolutionVariables.size(); i++) {
             System.out.print("x" + i + ": " + bestSolutionVariables.get(i) + " ");
             System.out.println();
         }
+    }
+
+    public String getTargetedFunctionName() {
+        return targetedFunction.getFunctionName();
     }
 }

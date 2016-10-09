@@ -2,7 +2,7 @@ package functions;
 
 import utility.ClosedInterval;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,10 +34,7 @@ public class DeJong implements Function {
 
     @Override
     public List<ClosedInterval> getVariablesDomain() {
-        List<ClosedInterval> domain = new ArrayList<>();
-        ClosedInterval interval = new ClosedInterval(DOMAIN_FIRST_ENDPOINT, DOMAIN_SECOND_ENDPOINT);
-        domain.add(interval);
-        return domain;
+        return Collections.singletonList(new ClosedInterval(DOMAIN_FIRST_ENDPOINT ,DOMAIN_SECOND_ENDPOINT));
     }
 
 }
