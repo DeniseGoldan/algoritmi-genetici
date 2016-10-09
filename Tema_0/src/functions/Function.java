@@ -9,9 +9,9 @@ import java.util.List;
  */
 public interface Function {
 
-    Function withNumberOfVariables(int desiredNumberOfVariables);
     String getFunctionName();
     List<ClosedInterval> getVariablesDomain();
     double getCalculationResult(List<Double> variables);
-    int getNumberOfVariables();
 }
+
+

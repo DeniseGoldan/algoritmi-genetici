@@ -9,14 +9,10 @@ public class ClosedInterval {
 
     public ClosedInterval(double desiredFirstEndpoint, double desiredSecondEndpoint) {
         if (desiredFirstEndpoint >= desiredSecondEndpoint) {
-            throw new AssertionError();
+            throw new AssertionError("The desired first endpoint is greater or equal to the desired second endpoint.");
         }
         firstEndpoint = desiredFirstEndpoint;
         secondEndpoint = desiredSecondEndpoint;
-    }
-
-    public ClosedInterval() {
-
     }
 
     public double getFirstEndpoint() {
@@ -25,7 +21,7 @@ public class ClosedInterval {
 
     public void setFirstEndpoint(double desiredFirstEndpoint) {
         if (desiredFirstEndpoint >= secondEndpoint) {
-            throw new AssertionError();
+            throw new AssertionError("The desired first endpoint is greater or equal to the second endpoint.");
         }
         firstEndpoint = desiredFirstEndpoint;
     }
@@ -36,9 +32,16 @@ public class ClosedInterval {
 
     public void setSecondEndpoint(double desiredSecondEndpoint) {
         if (firstEndpoint >= desiredSecondEndpoint) {
-            throw new AssertionError();
+            throw new AssertionError("The first endpoint is greater or equal to the desired second endpoint.");
         }
         secondEndpoint = desiredSecondEndpoint;
+    }
+
+    public static boolean isInsideClosedInterval(double value, ClosedInterval interval){
+        if (value < interval.getFirstEndpoint() || value > interval.getSecondEndpoint()){
+            return false;
+        }
+        return true;
     }
 
 }

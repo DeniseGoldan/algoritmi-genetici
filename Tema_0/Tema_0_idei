@@ -1,0 +1,65 @@
+x1, x2, x3, ... , xn
+pasul 1 - aplic valori random cuprinse in intervalul [a, b]
+pasul 2 - incerc sa caut cea mai buna solutie corespunzatoare lui x1, pastrand valorile random pentru celelalte variabile, ca si cand ar fi simple constante
+pasul 3 - gasesc pentru x1 solutia cea mai buna // ALGORITMUL
+pasul 4 - incerc sa gasesc pentru x2 solutia cea mai buna, avandu-le pe x1 setat si pe celelalte variabile cu valori setate random in pasul 1.
+...
+pasul corespunzator aflarii celei mai bune solutii pentru xn
+
+
+Map<Double, List<Double>> compareAndGetBestConfiguration(Map<Double, List<Double>> bestConfiguration, Map<Double, List<Double>> current){
+	Map<Double, List<Double>> currentSolution = new HashMap<Double, List<Double>>();
+	if (current.getKey() < bestConfiguration.getKey()){
+		bestConfiguration = current;
+	}
+	return bestSolution;
+}
+
+Map<Double, List<Double>> createConfiguration(List<Double> variables){
+	double result = getCalculationResult(variables);
+	Map<Double, List<Double>> configuration = new HashMap<Double, List<Double>>();
+	configuration.put(result, variables);
+	return configuration;
+}
+
+//CONFIGURARE
+void configurateSearch(){
+	Fie ADANCIMEA_MAXIMA = # setez eu o adancime posibila, va fi data ca argument in etapa configuarii;
+	aleg una din cele 4 functii si o configurez, o numesc function? myFunction? ceva de genul
+	setez numberOfVariables (=n)
+	List<Double> variables = RandomVariableValueGenerator.getRandomValue(function.getDomain());
+}
+
+List<Double> variabile_stanga = variable;
+List<Double> variabile_dreapta = variable;
+
+pas_inceput_de_functie = functie care imi stabileste dimensiunea pasului, care e d.p. cu function.getDomain()
+pas_ales = 	pas_inceput_de_functie;
+
+Map<Double, List<Double>> bestConfiguration = new HashMap<Double, List<Double>>()
+best Configuration = createConfiguration(List<Double> variables);
+
+//ALGORITM OPTIMIZARE - GASIRE MINIM
+optimizare (int adancime){
+	calculez minim local?
+	f(variables);
+}
+
+for (xi in variables)
+	
+	Map<Double, List<Double>> config_stanga = new HashMap<Double, List<Double>>();
+	Map<Double, List<Double>> config_dreapta = new HashMap<Double, List<Double>>()
+	stanga = x - pas_ales;
+	dreapta = x + pas_ales;
+	variabile_stanga.pe pozitia (i) <- stanga;
+	variablie_dreapta.pe pozitia (i) <- dreapta;
+	config_stanga = createConfiguration(variabile_stanga);
+	config_dreapta = createConfiguration(variabile_dreapta);
+	if (config_stanga.getKey(0) < bestConfiguration.getKey(0)){
+		bestConfiguration = config_stanga;
+		// in stanga trebuie sa ma indrept
+		optimize()
+	}else if (config_dreapta.getKey(0) < bestConfiguration.getKey(0)){
+		bestConfiguration = config_dreapta;
+		// in dreapta trebuie sa ma indrept	
+		}
